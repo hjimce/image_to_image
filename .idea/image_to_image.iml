@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="PYTHON_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/ExtendedYaleB" />
+      <excludeFolder url="file://$MODULE_DIR$/data" />
+      <excludeFolder url="file://$MODULE_DIR$/light_for_train" />
+      <excludeFolder url="file://$MODULE_DIR$/light_origin_data" />
+      <excludeFolder url="file://$MODULE_DIR$/manul" />
+      <excludeFolder url="file://$MODULE_DIR$/unsupervise" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>

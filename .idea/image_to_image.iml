@@ -7,6 +7,14 @@
       <excludeFolder url="file://$MODULE_DIR$/light_for_train" />
       <excludeFolder url="file://$MODULE_DIR$/light_origin_data" />
       <excludeFolder url="file://$MODULE_DIR$/manul" />
+      <excludeFolder url="file://$MODULE_DIR$/preprocess/A" />
+      <excludeFolder url="file://$MODULE_DIR$/preprocess/B" />
+      <excludeFolder url="file://$MODULE_DIR$/preprocess/b1" />
+      <excludeFolder url="file://$MODULE_DIR$/preprocess/b1~b4" />
+      <excludeFolder url="file://$MODULE_DIR$/preprocess/b2" />
+      <excludeFolder url="file://$MODULE_DIR$/preprocess/b3" />
+      <excludeFolder url="file://$MODULE_DIR$/preprocess/b4" />
+      <excludeFolder url="file://$MODULE_DIR$/preprocess/b5" />
       <excludeFolder url="file://$MODULE_DIR$/unsupervise" />
     </content>
     <orderEntry type="inheritedJdk" />

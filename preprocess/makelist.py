@@ -4,7 +4,7 @@
 import os
 import shutil
 import  random
-from facemask import  getmask,getface,getrectimage
+from facemask import  getmask,getface,getrectimage,get_landmark,getContourStat
 import  cv2
 import  numpy as np
 
@@ -35,6 +35,9 @@ def GetFileList(FindPath,FlagStr=[]):
 		FileList.sort()
 
 	return FileList
+
+
+
 
 def spiltdata(path_root,valratio=0.05):
 	classify_temp=os.listdir(path_root)
@@ -102,36 +105,10 @@ def writeunsupervise(images_root):
 	txtlist=open(images_root+'.txt','w')
 	txtlist.write(strlist)
 	txtlist.close()
-#首先进行人脸标准裁剪，覆盖原始图片
-def writelightlist(dataroot):
-	oriimagelist=os.listdir(dataroot+'/origin')
-	strlist=''
-	for o in oriimagelist:
-		oroot=dataroot+'/'+'origin'+'/'+o
-		F=getface(oroot)
-		if F is None:
-			continue
-		out=getrectimage(cv2.imread(oroot),F[0],F[1],F[2],F[3])
-		cv2.imwrite(oroot,out)
-		file_target=os.path.splitext(os.path.basename(o))[0]
 
-		file_target=dataroot+'/'+file_target
 
-		print file_target
-		image_target=os.listdir(file_target)
-		for it in image_target:
-			ext=os.path.splitext(os.path.basename(it))[1]
-			if ext!='.jpg':
-				continue
-			troot=file_target+'/'+it
-			strlist+=troot+' '+oroot+'\n'#输入等于输出
 
-			print troot
-			inputi=getrectimage(cv2.imread(troot),F[0],F[1],F[2],F[3])
-			cv2.imwrite(troot,inputi)
-	txtlist=open(dataroot+'/imagelist.txt','w')
-	txtlist.write(strlist)
-	txtlist.close()
+
 def getmaskimage(origImage,mask):
 	destimage = cv2.bitwise_and(origImage,origImage,mask = mask)
 	return  destimage
@@ -193,6 +170,55 @@ def stdcrop(dataroot):
 		cv2.imwrite(path,out)
 
 
+#首先进行人脸标准裁剪，覆盖原始图片
+def writelightlist(dataroot,origin_dataroot,Apath,Bpath,batchflag):
+	oriimagelist=os.listdir(origin_dataroot)
+	i=0
+	strlist=''
+	for o in oriimagelist:
+		troot=os.path.join(dataroot,os.path.splitext(o)[0])
+		oroot_image=os.path.join(origin_dataroot,o)
+		F=getface(oroot_image)
+		if F is None:
+			continue
+
+		inputimage=getrectimage(cv2.imread(oroot_image),F[0],F[1],F[2],F[3])
+
+
+
+		rgbImg = cv2.cvtColor(inputimage, cv2.COLOR_BGR2RGB)
+		landmark=get_landmark(rgbImg)
+		mask=getContourStat(landmark,inputimage)
+
+
+		input_maskimage=getmaskimage(inputimage,mask)
+		#cv2.imshow('input',input_maskimage)
+		#cv2.waitKey(0)
+
+		for root, dirs, files in os.walk(troot, topdown=False):
+
+			for troot_image in files:
+				if os.path.splitext(troot_image)[1]!='.jpg':
+					continue
+
+				troot_image=os.path.join(root, troot_image)
+
+				outputimage=getrectimage(cv2.imread(troot_image),F[0],F[1],F[2],F[3])
+				output_maskimage=getmaskimage(outputimage,mask)
+
+
+
+
+				inputnew=os.path.join(Apath,batchflag+str(i)+'.jpg')
+				outputnew=os.path.join(Bpath,batchflag+str(i)+'.jpg')
+				im_AB = np.concatenate([output_maskimage, input_maskimage], 1)
+				cv2.imwrite(inputnew, im_AB)
+				#cv2.imwrite(inputnew,output_maskimage)
+				#cv2.imwrite(outputnew,input_maskimage)
+				i+=1
+
+
+
 
 
 
@@ -209,10 +235,13 @@ def stdcrop(dataroot):
 #writeunsupervise('../data/oriimage_train')
 #writeunsupervise('../data/001')
 #writetrainlist('newtrain_val')
-#writelightlist("../manul/ori")
-#readlist('../manul/ori/imagelist.txt')
+'''writelightlist('b1','b1/origin','A','B','bone')
+writelightlist('b2','b2/origin','A','B','btwo')
+writelightlist('b3','b3/origin','A','B','bthree')
+writelightlist('b4','b4/origin','A','B','bfour')'''
+writelightlist('b5','b5/origin','A','B','bfive')
 
 #stdcrop('../unsupervise/ori')#所有训练数据，第一步都要进行人脸的标准裁剪
 
 #facemask("../unsupervise/ori")#只裁剪出人脸部分
-facemask("../realtest/mutil-light-ori/3")#只裁剪出人脸部分
+#facemask("../data/realtest/mutil-light-ori/0")#只裁剪出人脸部分

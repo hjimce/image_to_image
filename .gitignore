@@ -62,6 +62,8 @@ pix2pix/
 light_for_train/
 manul/
 *.jpg
+.idea/
+texture/
 
 # Specified for project
 *~

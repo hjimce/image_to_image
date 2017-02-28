@@ -104,12 +104,14 @@ def getrectimage(img,miny,maxy,minx,maxx):
     roi=img[miny:maxy,minx:maxx]
     rectshape=roi.shape
     maxlenght=max(rectshape[0],rectshape[1])
-    img0=np.zeros((maxlenght,maxlenght,3))
-    img0[(maxlenght*.5-rectshape[0]*.5):(maxlenght*.5+rectshape[0]*.5),(maxlenght*.5-rectshape[1]*.5):(maxlenght*.5+rectshape[1]*.5)]=roi
+    img0=np.zeros((maxlenght,maxlenght,3),np.uint8)
+    img0[int(maxlenght*.5-rectshape[0]*.5):int(maxlenght*.5+rectshape[0]*.5),
+    int(maxlenght*.5-rectshape[1]*.5):int(maxlenght*.5+rectshape[1]*.5)]=roi
     return  img0
 def getface(imgpath):
     bgrImg = cv2.imread(imgpath)
-    print bgrImg.shape
+    if bgrImg is None:
+        return  None
     rgbImg = cv2.cvtColor(bgrImg, cv2.COLOR_BGR2RGB)
     #img = io.imread('1.jpg')
     faces = face_detector(rgbImg, 1)
@@ -126,8 +128,8 @@ def getface(imgpath):
     scale=0.2
     miny=max(0,y-scale*h)
     minx=max(0,x-scale*w)
-    maxy=min(height,y+(1+scale)*h)
-    maxx=min(weight,x+(1+scale)*w)
+    maxy=min(height-1,y+(1+scale)*h)
+    maxx=min(weight-1,x+(1+scale)*w)
     return  [miny,maxy,minx,maxx]
 
 def getmask(imagepath):

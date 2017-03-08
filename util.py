@@ -33,7 +33,7 @@ def deconv(input,w_shape,out_shape,name,phase,use_batchnorm=True,use_relu=True):
 	return  cov
 def liner(input,out_size,name):
 	with tf.variable_scope(name):
-		w=tf.get_variable(name='linerw',shape=(input.get_shape()[-1],out_size),initializer=tf.truncated_normal_initializer(0,0.02))
+		w=tf.get_variable(name='linerw',shape=(input.get_shape()[-1],out_size),initializer=tf.truncated_normal_initializer(0,0.002))
 		b=tf.get_variable(name='linerb',shape=(out_size),initializer=tf.constant_initializer(0))
 
 		output=tf.matmul(input,w)+b

@@ -64,6 +64,9 @@ manul/
 *.jpg
 .idea/
 texture/
+model/
+*.db
+*.xml
 
 # Specified for project
 *~

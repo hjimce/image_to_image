@@ -4,12 +4,14 @@ import  numpy as np
 import  cv2
 from util import  conv,deconv,liner
 class dcgan(object):
-    def __init__(self,input_shape):
-        self.input_images=tf.placeholder(tf.float32,input_shape,'inputimage')
-    def g_net(self,x,batch_size,phase):
+
+
+    def g_net(self,x,batch_size,phase,input_size):
+
         gf_dim=64
         kenel_size=5
-        [s1,s2,s3,s4,s5,s6,s7,s8]=[256,256/2,256/4,256/8,256/16,256/32,256/64,256/128]
+        dropout_ratio=1
+        [s1,s2,s3,s4,s5,s6,s7,s8]=[input_size,input_size/2,input_size/4,input_size/8,input_size/16,input_size/32,input_size/64,input_size/128]
         conv1=conv(x,(kenel_size,kenel_size,3,gf_dim),'conv1',phase,use_batchnorm=False,active='lrelu')
         conv2=conv(conv1,(kenel_size,kenel_size,gf_dim,gf_dim*2),'conv2',phase,use_batchnorm=True,active='lrelu')
         conv3=conv(conv2,(kenel_size,kenel_size,gf_dim*2,gf_dim*4),'conv3',phase,use_batchnorm=True,active='lrelu')
@@ -52,19 +54,21 @@ class dcgan(object):
     def d_net(self,x,batch_size,phase):
         gf_dim=64
         kenel_size=5
-        conv1=conv(x,(kenel_size,kenel_size,6,gf_dim),'conv1',phase,use_batchnorm=False,active='lrelu')
-        conv2=conv(conv1,(kenel_size,kenel_size,gf_dim,gf_dim*2),'conv2',phase,use_batchnorm=True,active='lrelu')
-        conv3=conv(conv2,(kenel_size,kenel_size,gf_dim*2,gf_dim*4),'conv3',phase,use_batchnorm=True,active='lrelu')
-        conv4=conv(conv3,(kenel_size,kenel_size,gf_dim*4,gf_dim*8),'conv4',phase,use_batchnorm=True,active='lrelu')
+        conv1=conv(x,(kenel_size,kenel_size,6,gf_dim),'conv1',phase)
+        conv2=conv(conv1,(kenel_size,kenel_size,gf_dim,gf_dim*2),'conv2',phase)
+        conv3=conv(conv2,(kenel_size,kenel_size,gf_dim*2,gf_dim*4),'conv3',phase)
+        conv4=conv(conv3,(kenel_size,kenel_size,gf_dim*4,gf_dim*8),'conv4',phase)
 
         flatten=tf.reshape(conv4,(batch_size,-1))
         liner1=liner(flatten,1,'liner1')
 
 
         return  liner1
-    def train(self,x,y,batch_size):
+    def train(self,x,y,batch_size,input_size,use_wgan=False):
         with tf.variable_scope('g_net'):
-            fakex=self.g_net(x,batch_size,True)
+            tf.add_to_collection('x',x)
+            fakex=self.g_net(x,batch_size,True,input_size)
+            tf.add_to_collection('y',fakex)
         with tf.variable_scope('d_net'):
             negative=self.d_net(tf.concat(3,[fakex,x]),batch_size,True)
         with tf.variable_scope('d_net',reuse=True):
@@ -72,24 +76,39 @@ class dcgan(object):
         vars=tf.trainable_variables()
         gnetpara=[v for v  in vars if 'g_net' in v.name]
         dnetpara=[v for v in vars if 'd_net' in v.name]
-
-        print [g.name for g in gnetpara ]
-        print [d.name for d in dnetpara ]
-
-        fakeloss=tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(negative,tf.zeros_like(negative)))
-        realloss=tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(positive,tf.ones_like(positive)))
-        d_loss=fakeloss+realloss
-
-
-
-
-        g_loss=tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(negative,tf.ones_like(negative)))#+100*tf.reduce_mean(tf.abs(fakex-y))
-
-        dnet_update=tf.train.AdamOptimizer(0.0002,0.5).minimize(d_loss,var_list=dnetpara)
-        gnet_updata=tf.train.AdamOptimizer(0.0002,0.5).minimize(g_loss,var_list=gnetpara)
         self.fakex=fakex
 
-        return gnet_updata,dnet_update,g_loss,d_loss
+
+        if use_wgan:
+            d_loss=-(tf.reduce_mean(positive)-tf.reduce_mean(negative))
+            g_loss=-tf.reduce_mean(negative)#+10*tf.reduce_mean(tf.abs(fakex-y))
+
+            dnet_update=tf.train.RMSPropOptimizer(0.00005).minimize(d_loss,var_list=dnetpara)
+            gnet_updata = tf.train.RMSPropOptimizer(0.00005).minimize(g_loss,var_list=gnetpara)
+
+            clip_updates = [w.assign(tf.clip_by_value(w, -0.01, 0.01)) for w in dnetpara]
+
+
+
+        else:
+            fakeloss=tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(negative,tf.zeros_like(negative)))
+            realloss=tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(positive,tf.ones_like(positive)))
+            d_loss=fakeloss+realloss
+            g_loss=tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(negative,tf.ones_like(negative)))#+100*tf.reduce_mean(tf.abs(fakex-y))
+
+            dnet_update=tf.train.AdamOptimizer(0.0002,0.5).minimize(d_loss,var_list=dnetpara)
+            gnet_updata=tf.train.AdamOptimizer(0.0002,0.5).minimize(g_loss,var_list=gnetpara)
+            clip_updates=None
+
+
+        return gnet_updata,dnet_update,clip_updates,g_loss,d_loss
+    def test(self,x,batch_size,input_size):
+        with tf.variable_scope('g_net',reuse=True):
+            fakex=self.g_net(x,batch_size,True,input_size)
+        return fakex
+
+
+
 
 
 

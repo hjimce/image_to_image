@@ -20,11 +20,9 @@ def random_get_batch_data(dataroot,batch_size):
     return  batch_image
 
 class pix2pix(object):
-	def __init__(self, sess, image_size=257,
-				 batch_size=1, sample_size=1, output_size=256,
+	def __init__(self, batch_size=1,image_size=256, output_size=256,
 				 gf_dim=64, df_dim=64, L1_lambda=100,
-				 input_c_dim=3, output_c_dim=3, dataset_name='facades',
-				 checkpoint_dir=None, sample_dir=None):
+				 input_c_dim=3, output_c_dim=3):
 		"""
 
 		Args:
@@ -36,11 +34,9 @@ class pix2pix(object):
 			input_c_dim: (optional) Dimension of input image color. For grayscale input, set to 1. [3]
 			output_c_dim: (optional) Dimension of output image color. For grayscale input, set to 1. [3]
 		"""
-		self.sess = sess
 		self.is_grayscale = (input_c_dim == 1)
 		self.batch_size = batch_size
 		self.image_size = image_size
-		self.sample_size = sample_size
 		self.output_size = output_size
 
 		self.gf_dim = gf_dim
@@ -72,20 +68,14 @@ class pix2pix(object):
 		self.g_bn_d6 = batch_norm(name='g_bn_d6')
 		self.g_bn_d7 = batch_norm(name='g_bn_d7')
 
-		self.dataset_name = dataset_name
-		self.checkpoint_dir = checkpoint_dir
-		self.build_model()
 
-	def build_model(self):
-		self.real_data = tf.placeholder(tf.float32,
-										[self.batch_size, self.image_size, self.image_size,
-										 self.input_c_dim],
-										name='real_A_and_B_images')
 
-		self.real_B = self.real_data
-		self.real_A = self.real_data
+	def train(self,x,y,batch_size,input_size,use_wgan=False):
 
-		self.fake_B = self.generator(self.real_A)
+		self.real_B = y
+		self.real_A = x
+		with tf.variable_scope('gnet'):
+			self.fake_B = self.generator(self.real_A)
 
 		self.real_AB = tf.concat(3, [self.real_A, self.real_B])
 		self.fake_AB = tf.concat(3, [self.real_A, self.fake_B])
@@ -114,15 +104,22 @@ class pix2pix(object):
 		self.g_vars = [var for var in t_vars if 'g_' in var.name]
 
 		self.saver = tf.train.Saver()
-
-
-
-	def train(self):
-
 		d_optim = tf.train.AdamOptimizer(0.0002, 0.5) \
 						  .minimize(self.d_loss, var_list=self.d_vars)
 		g_optim = tf.train.AdamOptimizer(0.0002, 0.5) \
 						  .minimize(self.g_loss, var_list=self.g_vars)
+		clip_updates=None
+		return g_optim,d_optim,clip_updates,self.g_loss,self.d_loss
+	def test(self,x,batch_size,input_size):
+		with tf.variable_scope('gnet',reuse=True):
+			fakex = self.generator(x)
+		return  fakex
+
+
+
+	'''def train(self):
+
+
 		tf.initialize_all_variables().run()
 
 		for epoch in xrange(10000):
@@ -138,7 +135,7 @@ class pix2pix(object):
 				cv2.imwrite('you/'+str(epoch)+'.jpg',((sampleimage[0,:,:,:]+1)*127.5).astype(np.uint8))
 
 
-			print g_loss_np,d_loss_np
+			print g_loss_np,d_loss_np'''
 
 
 	def discriminator(self, image, y=None, reuse=False):

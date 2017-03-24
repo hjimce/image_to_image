@@ -23,8 +23,31 @@ def choose_method(image,method):
         resized_image = cv2.resize(image,scale)
         dst=cv2.resize(resized_image,(image.shape[1],image.shape[0]))
     elif method=='gaussian_noise':
-        dst=np.random.normal(0, kenel_size+15, size=image.shape)+image
-    return dst
+        noise_R=random.uniform(1.5,4.5)
+        noise_std=random.uniform(6,22)
+        dst=np.random.normal(0, noise_std, size=(image.shape[0],image.shape[1]))
+
+        #dst=np.clip(dst,-10,10)
+        #print dst
+
+        dst=np.asarray([dst,dst,dst]).transpose((1,2,0))
+        print dst.shape
+        #.reshape(image.shape[0],image.shape[1],3)
+
+
+        dst=cv2.resize(dst,(int(image.shape[0]*noise_R),int(image.shape[1]*noise_R)))
+        #print dst
+        A=image
+        B=np.clip(image+dst[:image.shape[0],:image.shape[1]],0,255)
+        C=np.clip(dst[:image.shape[0],:image.shape[1]],0,255)
+        image=np.concatenate([A, B,C], 1)
+        #cv2.imshow('dst',dst)
+        #cv2.waitKey(0)
+
+
+            #+image
+
+    return image,noise_std,noise_R
 
 def create_blur_data(dataroot):
     ori_dataroot=dataroot+'/'+'ori'
@@ -43,15 +66,20 @@ def create_blur_data2(datarootA,datarootB):
     files=os.listdir(datarootA)
     for f in files:
         dirname=os.path.splitext(f)[0]
-        image=cv2.imread(datarootA+'/'+f)
-        dmethod=['avg_smooth','gaussian_smooth','median_smooth','resize_smooth',
-                 'gaussian_noise']
+        imageB=cv2.imread(datarootA+'/'+f)
+
+        dmethod=['gaussian_noise']
         for d in dmethod:
-            newfile_pathA=datarootA+'/'+dirname+'_'+d+'.jpg'
-            newfile_pathB=datarootB+'/'+dirname+'_'+d+'.jpg'
-            cv2.imwrite(newfile_pathA,choose_method(image,d))
-            cv2.imwrite(newfile_pathB,cv2.imread(datarootB+'/'+f))
+            imageA,std,R=choose_method(imageB,d)
+            #print imageA
+            newfile_pathB=datarootB+'/'+dirname+'_std'+str(std)+'_R'+str(R)+'.jpg'
+            cv2.imwrite(newfile_pathB,imageA)
 #create_blur_data('../data/batch2_ori')
-create_blur_data2('A','B')
+create_blur_data2('213/00005800','ab')
+create_blur_data2('213/00005845','ab')
+create_blur_data2('213/00005897','ab')
+create_blur_data2('213/00005942','ab')
+create_blur_data2('213/00005962','ab')
+create_blur_data2('light/origin','ab')
 
 

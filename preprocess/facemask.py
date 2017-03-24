@@ -126,10 +126,10 @@ def getface(imgpath):
     w=int(x2-x1)
     h=int(y2-y1)
     scale=0.2
-    miny=max(0,y-scale*h)
-    minx=max(0,x-scale*w)
-    maxy=min(height-1,y+(1+scale)*h)
-    maxx=min(weight-1,x+(1+scale)*w)
+    miny=int(max(0,y-scale*h))
+    minx=int(max(0,x-scale*w))
+    maxy=int(min(height-1,y+(1+scale)*h))
+    maxx=int(min(weight-1,x+(1+scale)*w))
     return  [miny,maxy,minx,maxx]
 
 def getmask(imagepath):

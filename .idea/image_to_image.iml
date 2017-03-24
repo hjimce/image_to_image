@@ -15,6 +15,11 @@
       <excludeFolder url="file://$MODULE_DIR$/preprocess/b3" />
       <excludeFolder url="file://$MODULE_DIR$/preprocess/b4" />
       <excludeFolder url="file://$MODULE_DIR$/preprocess/b5" />
+      <excludeFolder url="file://$MODULE_DIR$/preprocess/dis" />
+      <excludeFolder url="file://$MODULE_DIR$/preprocess/light" />
+      <excludeFolder url="file://$MODULE_DIR$/preprocess/光照" />
+      <excludeFolder url="file://$MODULE_DIR$/preprocess/照片去透视" />
+      <excludeFolder url="file://$MODULE_DIR$/preprocess/透视" />
       <excludeFolder url="file://$MODULE_DIR$/unsupervise" />
     </content>
     <orderEntry type="inheritedJdk" />

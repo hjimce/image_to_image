@@ -4,6 +4,7 @@ import  matplotlib.pyplot as plt
 import  cv2
 import  dlib
 import  os
+import  types
 #根据人脸框bbox，从一张完整图片裁剪出人脸,并保存问文件名cropimgname
 #如果未检测到人脸,那么返回false,否则返回true
 face_detector=dlib.get_frontal_face_detector()
@@ -101,36 +102,39 @@ def getContourStat(contour,image):
 	return mask
 #根据人脸框bbox，从一张完整图片裁剪出人脸
 def getrectimage(img,miny,maxy,minx,maxx):
-    roi=img[miny:maxy,minx:maxx]
-    rectshape=roi.shape
-    maxlenght=max(rectshape[0],rectshape[1])
-    img0=np.zeros((maxlenght,maxlenght,3),np.uint8)
-    img0[int(maxlenght*.5-rectshape[0]*.5):int(maxlenght*.5+rectshape[0]*.5),
-    int(maxlenght*.5-rectshape[1]*.5):int(maxlenght*.5+rectshape[1]*.5)]=roi
-    return  img0
+	roi=img[miny:maxy,minx:maxx]
+	rectshape=roi.shape
+	maxlenght=max(rectshape[0],rectshape[1])
+	img0=np.zeros((maxlenght,maxlenght,3),np.uint8)
+	img0[int(maxlenght*.5-rectshape[0]*.5):int(maxlenght*.5+rectshape[0]*.5),
+	int(maxlenght*.5-rectshape[1]*.5):int(maxlenght*.5+rectshape[1]*.5)]=roi
+	return  img0
 def getface(imgpath):
-    bgrImg = cv2.imread(imgpath)
-    if bgrImg is None:
-        return  None
-    rgbImg = cv2.cvtColor(bgrImg, cv2.COLOR_BGR2RGB)
-    #img = io.imread('1.jpg')
-    faces = face_detector(rgbImg, 1)
-    if len(faces) <=0:
-        return None
-    face=max(faces, key=lambda rect: rect.width() * rect.height())
-    [x1,x2,y1,y2]=[face.left(),face.right(),face.top(),face.bottom()]
-    img = bgrImg
-    height, weight =np.shape(img)[:2]
-    x=int(x1)
-    y=int(y1)
-    w=int(x2-x1)
-    h=int(y2-y1)
-    scale=0.2
-    miny=int(max(0,y-scale*h))
-    minx=int(max(0,x-scale*w))
-    maxy=int(min(height-1,y+(1+scale)*h))
-    maxx=int(min(weight-1,x+(1+scale)*w))
-    return  [miny,maxy,minx,maxx]
+	if type(imgpath) is types.StringType:
+		bgrImg = cv2.imread(imgpath)
+	else:
+		bgrImg=imgpath
+	if bgrImg is None:
+		return  None
+	rgbImg = cv2.cvtColor(bgrImg, cv2.COLOR_BGR2RGB)
+	#img = io.imread('1.jpg')
+	faces = face_detector(rgbImg, 1)
+	if len(faces) <=0:
+		return None
+	face=max(faces, key=lambda rect: rect.width() * rect.height())
+	[x1,x2,y1,y2]=[face.left(),face.right(),face.top(),face.bottom()]
+	img = bgrImg
+	height, weight =np.shape(img)[:2]
+	x=int(x1)
+	y=int(y1)
+	w=int(x2-x1)
+	h=int(y2-y1)
+	scale=0.2
+	miny=int(max(0,y-scale*h))
+	minx=int(max(0,x-scale*w))
+	maxy=int(min(height-1,y+(1+scale)*h))
+	maxx=int(min(weight-1,x+(1+scale)*w))
+	return  [miny,maxy,minx,maxx]
 
 def getmask(imagepath):
 	landmark=getface_cortour(imagepath)

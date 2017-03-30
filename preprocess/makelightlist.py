@@ -215,6 +215,11 @@ def writelightlist(dataroot,origin_dataroot,Apath,batchflag):
 				#cv2.imwrite(inputnew,output_maskimage)
 				#cv2.imwrite(outputnew,input_maskimage)
 				i+=1
+
+
+
+
+
 def makeunsupervise(dataroot,ABpath,batchflag):
 	oriimagelist=os.listdir(dataroot)
 	i=0
@@ -256,10 +261,10 @@ def makeunsupervise(dataroot,ABpath,batchflag):
 
 
 
-writelightlist('light/batch4/b1','light/batch4/origin','AB','batch4_b1')
-writelightlist('light/batch4/b2','light/batch4/origin','AB','batch4_b2')
-writelightlist('light/batch4/b3','light/batch4/origin','AB','batch4_b3')
-writelightlist('light/batch4/b4','light/batch4/origin','AB','batch4_b4')
+#writelightlist('light/batch4/b1','light/batch4/origin','AB','batch4_b1')
+#writelightlist('light/batch4/b2','light/batch4/origin','AB','batch4_b2')
+#writelightlist('light/batch4/b3','light/batch4/origin','AB','batch4_b3')
+#writelightlist('light/batch4/b4','light/batch4/origin','AB','batch4_b4')
 #makeunsupervise('light/origin','light/AB','origin')
 
 #stdcrop('../unsupervise/ori')#所有训练数据，第一步都要进行人脸的标准裁剪

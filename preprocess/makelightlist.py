@@ -219,8 +219,8 @@ def writelightlist(dataroot,origin_dataroot,Apath,batchflag):
 
 
 
-
-def makeunsupervise(dataroot,ABpath,batchflag):
+#AA
+def makeunsuperviseAA(dataroot,ABpath,batchflag):
 	oriimagelist=os.listdir(dataroot)
 	i=0
 	for o in oriimagelist:
@@ -246,6 +246,42 @@ def makeunsupervise(dataroot,ABpath,batchflag):
 
 		inputnew=os.path.join(ABpath,batchflag+str(i)+'.jpg')
 		im_AB = np.concatenate([input_maskimage, input_maskimage], 1)
+		print im_AB.shape
+		cv2.imwrite(inputnew, im_AB)
+		i+=1
+def maskinput_image(origin_image_root,size):
+	F=getface(oroot_imageA)
+	if F is None:
+		return None
+	inputimage=getrectimage(cv2.imread(oroot_image),F[0],F[1],F[2],F[3])
+	rgbImg = cv2.cvtColor(inputimage, cv2.COLOR_BGR2RGB)
+	landmark=get_landmark(rgbImg)
+	if landmark is None:
+		return None
+	mask=getContourStat(landmark,inputimage)
+	input_maskimage=getmaskimage(inputimage,mask)
+
+	input_maskimage=cv2.resize(input_maskimage,(300,300))
+	return input_maskimage
+
+
+def makeunsuperviseAB(datarootA,datarootB,ABpath,batchflag):
+	oriimagelistA=os.listdir(datarootA)
+	oriimagelistB=os.listdir(datarootB)
+	for i,A,B in enumerate(zip(oriimagelistA,oriimagelistB)):
+		root_imageA=os.path.join(datarootA,A)
+		root_imageB=os.path.join(datarootB,B)
+		A=maskinput_image(root_imageA)
+		B=maskinput_image(root_imageB)
+		if A is None or B is None:
+			continue
+
+		#cv2.imshow('input',input_maskimage)
+		#cv2.waitKey(0)
+
+
+		inputnew=os.path.join(ABpath,batchflag+str(i)+'.jpg')
+		im_AB = np.concatenate([A, B], 1)
 		print im_AB.shape
 		cv2.imwrite(inputnew, im_AB)
 		i+=1
